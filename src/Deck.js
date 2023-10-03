@@ -32,28 +32,43 @@ function Deck() {
   async function drawCard() {
     const response = await fetch(`${BASE_URL}/${deck.deck.deck_id}/draw/?count=1`);
     const cardInfo = await response.json();
-    //console.log(cardInfo)
     const card = cardInfo.cards[0];
-      //card.style = (our style stuff)
     setCardsDrawn(prevCards => [...prevCards, card]);
   }
 
+  /** Shuffles the current deck */
+  async function shuffleDeck() {
+    setDeck({
+      deck: null,
+      loaded: false
+    });
+
+    setCardsDrawn([]);
+
+    const response = await fetch(`${BASE_URL}/new/shuffle/?deck_count=1`);
+    const deck = await response.json();
+    setDeck({
+      deck: deck,
+      loaded: true
+    });
+  }
 
 
-  function makeCardList(){
+  /** Render list of all drawn cards */
+  function makeCardList() {
     const jitter = 20;
 
     const cardPile = cardsDrawn.map(card => {
-      let xJitter = Math.round(jitter*Math.random());
-      let yJitter = Math.round(jitter*Math.random());
-      let currAngle = Math.round(360*Math.random());
+      let xJitter = Math.round(jitter * Math.random());
+      let yJitter = Math.round(jitter * Math.random());
+      let currAngle = Math.round(360 * Math.random());
 
       const imgStyle = {
         position: "absolute",
         transform: `rotate(${currAngle}deg)`,
         top: `${180 + yJitter}px`,
         left: `${180 + xJitter}px`,
-      }
+      };
       return <img src={card.image} style={imgStyle} />;
     });
     return cardPile;
@@ -62,59 +77,19 @@ function Deck() {
   return (
     <div>
       <h1>Card Display</h1>
-      {(deck.loaded) && <button onClick={drawCard}>Draw Card</button>}
+      {(deck.loaded) &&
+        <>
+          <button onClick={drawCard}>Draw Card</button>
+        </>
+      }
+      <button disabled={!deck.loaded} onClick={shuffleDeck}>Shuffle Deck</button>
       <br />
       {(cardsDrawn.length > 0) &&
-      <div className="CardPile">
-        {makeCardList()}
-      </div>}
+        <div className="CardPile">
+          {makeCardList()}
+        </div>}
     </div>
   );
 }
 
 export default Deck;
-
-// {
-//   "success": true,
-//     "deck_id": "3p40paa87x90",
-//       "shuffled": false,
-//         "remaining": 52;
-// }
-
-// https://deckofcardsapi.com/api/deck/<<deck_id>>/draw/?count=1
-
-
-// {
-//   "success": true,
-//   "deck_id": "kxozasf3edqu",
-//   "cards": [
-//       {
-//           "code": "6H",
-//           "image": "https://deckofcardsapi.com/static/img/6H.png",
-//           "images": {
-//                         "svg": "https://deckofcardsapi.com/static/img/6H.svg",
-//                         "png": "https://deckofcardsapi.com/static/img/6H.png"
-//                     },
-//           "value": "6",
-//           "suit": "HEARTS"
-//       },
-//   ],
-//   "remaining": 50
-// }
-
-
-// function handleClick(evt) {
-//   const x = window.innerWidth * Math.random();
-//   const y = window.innerHeight * Math.random();
-//   setBags(prevBags => [...prevBags, { x, y }]);
-// }
-
-// const bagsImages = bags.map((bag, i) => (
-//   <img
-//     key={i}
-//     src={chipsImg}
-//     className="bag"
-//     style={{ top: `${bag.y}px`, left: `${bag.x}px` }}
-//     alt="bag of lay's chips"
-//   />
-// ));
